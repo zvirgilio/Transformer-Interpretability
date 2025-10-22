@@ -40,18 +40,18 @@ class BatchNorm1d:
 		self.beta = torch.zeros(dim)
 		# buffers
 		self.running_mean = torch.zeros(dim)
-		self.running_std = torch.ones(dim)
+		self.running_var = torch.ones(dim)
 
 	def __call__(self, x):
 		# compute forward pass
 		if self.training:
-			xmean = x.mean(0, keepdim = True)
-			xvar = x.var(0, keepdim=True)
+			xmean = x.mean(0, keepdim = True) #batch mean
+			xvar = x.var(0, keepdim=True)	  #batch var
 		else:
 			xmean = self.running_mean
-			xstd = self.running_var
+			xvar = self.running_var
 
-		xhat = (x-mean) / torch.sqrt(xvar+self.eps)
+		xhat = (x-xmean) / torch.sqrt(xvar+self.eps)
 		self.out = self.gamma * xhat + self.beta
 
 		# update buffers
@@ -111,7 +111,7 @@ Xte, Yte = build_dataset(words[n2:])
 
 
 n_embed = 10
-n_hidden = 200
+n_hidden = 100
 vocab_size = len(chars)+1
 
 C  = torch.randn((vocab_size, n_embed),		      generator=g)
@@ -121,13 +121,13 @@ layers = [
 	Linear(			n_hidden, n_hidden), BatchNorm1d(n_hidden), Tanh(),
 	Linear(			n_hidden, n_hidden), BatchNorm1d(n_hidden), Tanh(),
 	Linear(			n_hidden, n_hidden), BatchNorm1d(n_hidden), Tanh(),
-	Linear(			n_hidden, vocab_size),
-	
+	Linear(			n_hidden, vocab_size), BatchNorm1d(vocab_size)
 ]
 
 with torch.no_grad():
 	# last layer less confident
-	layers[-1].weight *= 0.1
+	# layers[-1].weight *= 0.1 #last layer is batch norm, doesn't have weight
+	layers[-1].gamma *= 0.1 #change batchnorm gamma to make less confident
 	# apply gain to all other linear layers
 	for layer in layers[:-1]:
 		if isinstance(layer, Linear):
@@ -141,7 +141,7 @@ print(sum(p.nelement() for p in parameters))
 for p in parameters:
 	p.requires_grad = True
 
-max_steps = 500000
+max_steps = 200000
 batch_size = 32
 lossi = []
 ud = []
@@ -178,8 +178,8 @@ for i in range(max_steps):
 	with torch.no_grad():
 		ud.append([(lr*p.grad.std() / p.data.std()).log10().item() for p in parameters])
 
-	if i >= 10000:
-		break
+	# if i >= 10000:
+	# 	break
 
 # visualize histograms of layer activation
 plt.figure(figsize=(20, 4))
@@ -276,6 +276,13 @@ split_loss('train')
 split_loss('val')
 
 ## sample names from the model
+
+# turn training mode off
+for layer in layers:
+	if isinstance(layer, BatchNorm1d):
+		layer.training = False
+
+
 for i in range(10):
 	out = []
 	context = [0]*blocksize
@@ -286,6 +293,7 @@ for i in range(10):
 		for layer in layers:
 			x = layer(x)
 		probs = F.softmax(x, dim=1)
+		# print(probs)
 		ix = torch.multinomial(probs, num_samples=1, replacement=True, generator=g).item()
 
 		context = context[1:]+[ix]

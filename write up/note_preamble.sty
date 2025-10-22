@@ -1,0 +1,118 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{note_preamble}[2025/10/20]
+
+
+
+\RequirePackage{listings}
+\RequirePackage{xcolor}
+\RequirePackage[T1]{fontenc}
+\RequirePackage{amsmath}
+\RequirePackage{amsfonts}
+\RequirePackage{amssymb}
+\RequirePackage[skins, most]{tcolorbox}
+\RequirePackage[colorlinks=true]{hyperref}
+
+
+%%%%%%%%% COLOR DEFINITIONS %%%%%%%%
+
+\definecolor{yorhabg}{HTML}{131314}		%background
+\definecolor{yorhafg}{HTML}{C9C7CD}		%foreground
+\definecolor{yorhagrid}{HTML}{B5AF9C}
+\definecolor{mred}{HTML}{D67069}		%box color red
+\definecolor{mblue}{HTML}{6887A1}		%box color blue
+
+%New code environment colors defined below
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% set page and text color
+\pagecolor{yorhabg}
+\color{yorhafg}
+
+
+
+
+%%%%%%%%% Code listing style named "python-style1" %%%%%%%%%%
+\lstdefinestyle{python-style1}{
+  backgroundcolor=\color{backcolour}, commentstyle=\color{codegreen},
+  keywordstyle=\color{magenta},
+  numberstyle=\tiny\color{codegray},
+  stringstyle=\color{codepurple},
+  basicstyle=\ttfamily\footnotesize\color{yorhabg},
+  breakatwhitespace=false,         
+  breaklines=true,                 
+  captionpos=b,                    
+  keepspaces=true,                 
+  numbers=left,                    
+  numbersep=5pt,                  
+  showspaces=false,                
+  showstringspaces=false,
+  showtabs=false,                  
+  tabsize=2
+}
+
+%%%%%%%%%%%%%%%%% Margins %%%%%%%%%%%%%%%
+\topmargin=0in
+\evensidemargin=0in
+\oddsidemargin=0in
+\textwidth=6.5in
+\textheight=9.0in
+\headsep=0.25in
+
+
+%%%%%%%%%% COLOR BOXES %%%%%%%%%%%%%
+\AtBeginEnvironment{tcolorbox}{\small}
+
+\newtcolorbox{bluebox}[1]{
+    enhanced, 
+    colback=yorhabg,
+    colframe=mblue,
+    coltext=yorhafg,
+    coltitle=yorhabg,
+    attach boxed title to top left={yshift*=-\tcboxedtitleheight}, 
+    title={#1},
+    boxed title size=title,
+    boxed title style={%
+        rounded corners=northeast, 
+        rounded corners=northwest, 
+        colback=tcbcolframe, 
+        boxrule=0pt,
+    },
+    underlay boxed title={%
+        \path[fill=tcbcolframe] (title.south west)--(title.south east) 
+            to[out=0, in=180] ([xshift=5mm]title.east)--
+            (title.center-|frame.east)
+            [rounded corners=5pt] |- 
+            (frame.north) -| cycle; 
+    },
+}
+
+\newtcolorbox{redbox}[1]{
+    enhanced, 
+    colback=yorhabg,
+    colframe=mred,
+    coltext=yorhafg,
+    coltitle=yorhabg,
+    attach boxed title to top left={yshift*=-\tcboxedtitleheight}, 
+    title={#1},
+    boxed title size=title,
+    boxed title style={%
+        rounded corners=northeast, 
+        rounded corners=northwest, 
+        colback=tcbcolframe, 
+        boxrule=0pt,
+    },
+    underlay boxed title={%
+        \path[fill=tcbcolframe] (title.south west)--(title.south east) 
+            to[out=0, in=180] ([xshift=5mm]title.east)--
+            (title.center-|frame.east)
+            [rounded corners=5pt] |- 
+            (frame.north) -| cycle; 
+    },
+}
+
