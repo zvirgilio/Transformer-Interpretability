@@ -70,6 +70,166 @@ Containers from PyTorch are ways of organizing layers into lists or dicts.
 \subsection*{Expiremental Harness}
 When training takes longer and longer, need a way to test hyper-parameters such as learning rates and tune those without running the full training over and over.
 
+\subsection*{Self attention trick}
+\begin{lstlisting}[language=Python]    
+import pytorch
+
+torch.manual_seed(1337)
+B, T, C = 4, 8, 2 # batch, time (block_size), channels (how many outputs)
+x = torch.randn(B, T, C)
+x.shape
+\end{lstlisting}
+want the 8 tokens in a block to 'talk' with each other.  
+The fifth token in a block doesn't need info about sixth, seventh, eighth.  
+Information only flows forwards in time.  We want the average of all the vectors corresponding to the previous tokens.  This is called \emph{bag of words} (bow).
+\begin{lstlisting}[language=Python]
+    xbow = torch.zeros((B, T, C))
+    for b in range(B):
+        for t in range(T):
+            xprev = x[b,:t+1] # size (t, C)
+            xbow[b,t] = torch.mean(xprev, 0)
+\end{lstlisting}
+But this is very inefficient.  
+We can speed it up with matrix multiplication.
+
+Recall:
+\[
+    \begin{bmatrix}
+        1 & 1 & 1
+    \end{bmatrix}\cdot 
+    \begin{bmatrix}
+        a & b & c
+    \end{bmatrix} = a + b + c
+\]
+We can use a lower triangular matrix:
+\[
+    \begin{bmatrix}
+        1 & 0 & 0 \\[1mm] \frac{1}{2} & \frac{1}{2} & 0 \\[1mm] \frac{1}{3} & \frac{1}{3} & \frac{1}{3}
+    \end{bmatrix}\cdot 
+    \begin{bmatrix}
+        a & d \\ b & e \\ c & f
+    \end{bmatrix} = \begin{bmatrix}
+        \begin{bmatrix}
+            1 & 0 & 0
+        \end{bmatrix}\cdot 
+        \begin{bmatrix}
+            a & b & c
+        \end{bmatrix} & 
+        \begin{bmatrix}
+            1 & 0 & 0
+        \end{bmatrix}\cdot 
+        \begin{bmatrix}
+            d & e & f
+        \end{bmatrix} \\[1mm]  
+        \begin{bmatrix}
+            \frac{1}{2} & \frac{1}{2} & 0
+        \end{bmatrix}\cdot 
+        \begin{bmatrix}
+            a & b & c
+        \end{bmatrix} & 
+        \begin{bmatrix}
+            \frac{1}{2} & \frac{1}{2} & 0
+        \end{bmatrix}\cdot 
+        \begin{bmatrix}
+            d & e & f
+        \end{bmatrix} \\[1mm] 
+        \begin{bmatrix}
+            \frac{1}{3} & \frac{1}{3} & \frac{1}{3}
+        \end{bmatrix}\cdot 
+        \begin{bmatrix}
+            a & b & c
+        \end{bmatrix} & 
+        \begin{bmatrix}
+            \frac{1}{3} & \frac{1}{3} & \frac{1}{3}
+        \end{bmatrix}\cdot 
+        \begin{bmatrix}
+            d & e & f
+        \end{bmatrix}  
+    \end{bmatrix} = 
+    \begin{bmatrix}
+        a & d \\[1mm] \frac{a+b}{2} & \frac{d+e}{2} \\[1mm] \frac{a+b+c}{3} & \frac{d+e+f}{3}
+    \end{bmatrix}
+\]
+We can instantly compute the averages.
+This lets us vectorize the previous process:
+\begin{lstlisting}[language=Python]
+    wei = torch.tril(torch.ones(T, T)) # tril = triangular, lower
+    wei = wei / wei.sum(1, keepdim=True) # divide by each rows total
+    xbow2 = wei @ x 
+\end{lstlisting}
+The dimensions don't line up, we have: $(T, T)\cdot (B, T, C)$.  
+So torch will replicate the $(T, T)$ $B$ many times giving dimensions: $(B, T, T) \cdot (B, T, C)$ and then multiply each batch element in parallel, so we have a $(T, T)\cdot (T, C) = (T, C)$ computation for each element in the batch $B$.
+
+There is a third way to do this, using \emph{softmax}.
+\begin{lstlisting}[language=Python]
+    tril = torch.tril(torch.ones(T, T))
+    wei = torch.zeros(T, T)
+    wei = wei.masked_fill(tril == 0, float('-inf')) #all elements that are zero in tril (lower triangular) become -infinity
+    wei = F.softmax(wei, dim=-1) # e to each value, then normalize the rows to sum to 1
+    xbow3 = wei @ x
+\end{lstlisting}
+Can generalize this idea to more general weighted averages based on how important some past tokens are to the current token.  
+
+Here is the implementation for a single self attention head.
+Every single token will emit two vectors: a query vector and a key vector.
+The query vector is 'what am I looking for', the key vectors is 'what do I contain'.
+The query vector of a token dot products with the key vector of all previous tokens in the block and this should be the information stored in \emph{wei}, the weights.  If the key and query are aligned (in space, which should be learned), their dot product will be high, ensuring that the previous token with that key has more influence on the current vector querying the context.
+
+We also produce a \emph{value} parameter.  We don't aggregate $x$, instead we aggregate value applied to $x$.
+
+Attention is a communcation mechanism between nodes in a direct graph.  A given node aggregates information with a weight sum from all the nodes that point towards it.
+There is no notion of space (such as in convolution).  Attention simply acts over a set of vectors, hence the need to positionally encode tokens.
+This is why there is a positional encoding added to the token embeddedings.
+You don't need to have the lower triangular masking in more general settings, such as in an encoder block in sentiment analysis.
+
+Self-attention because keys, querys and values all come from the same $x$. In general, you could have a case where querys come from $x$, but keys and values come from an external source of context, where would like to pull that into our nodes.
+
+Scaled attention divides $QK^T$ by $\sqrt{\textit{head size}}$. This preverves the variance of \emph{wei} at 1. 
+This is important, especially at initialization, to ensure that \emph{wei} has diffuse values.  
+When being fed into \emph{softmax}, any values that are too positive or negative will cause \emph{wei} to converge to one-hot vectors.
+\begin{lstlisting}[language=Python]
+import torch
+import torch.nn as nn
+from torch.nn import functional as F
+
+torch.manual_seed(1337)
+
+B, T, C = 4, 8, 32 # batch, time (block_size), channels (how many outputs)
+x = torch.randn(B, T, C)
+
+# single head self-attention
+head_size = 16 # this is a hyper parameter
+key = nn.Linear(C, head_size, bias=False) #linear layer with no bias is a matrix multiply with fixed weights
+query = nn.Linear(C, head_size, bias=False)
+value = nn.Linear(C, head_size, bias=False)
+k = key(x)      # (B, T, 16)
+q = query(x)    # (B, T, 16)
+
+# this is the step where the communication occurs
+wei = q @ k.transpose(-2, -1) # transpose last two dimensions, not the first (B, T, 16) @ (B, 16, T) --> (B, T, T)
+wei = wei * head_size**-0.5   # scaled attention
+
+tril = torch.tril(torch.ones(T, T))
+wei = wei.masked_fill(tril == 0, float('-inf')) #all elements that are zero in tril (lower triangular) become -infinity
+wei = F.softmax(wei, dim=-1) # e to each value, then normalize the rows to sum to 1
+
+v = value(x)    # (B, T, 16)
+out = wei @ v   # (B, T, T) @ (B, T, 16) --> (B, T, 16)
+\end{lstlisting}
+
+\subsection*{Residual Connections}
+When training very large/deep neural networks, optimization begins to degrade with size.
+This is not explained by overfitting along, as even training errors grows.
+A way to counter this is with residual connections, where identity blocks are added in.
+The blocks take the inputs, unaltered, and add them to outputs at later stages in the training.  
+This ensures that performance does not become worse.
+It also places little strain on optimization as the gradient of addition is simple.
+You can fork off the residual pathway at will, and project back in by addition.
+The blocks that fork off are intialized to have very small gradients, so early on in training there is a quick gradient path back from the outputs to the inputs.
+Only later in training do these blocks come on line.
+
+Dropout layers prevent overfitting.  Every forward/backward pass, randomly turns off some neurons, ends up training an ensamble of networks that all end up working together.
+
 \section*{Makemore Code Snippets}
 \begin{lstlisting}[language=Python, caption={Activation graph with matplotlib}, label={code:activation-graph}]    
 # visualize histograms of layer activation
