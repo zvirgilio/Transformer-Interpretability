@@ -227,6 +227,7 @@ It also places little strain on optimization as the gradient of addition is simp
 You can fork off the residual pathway at will, and project back in by addition.
 The blocks that fork off are intialized to have very small gradients, so early on in training there is a quick gradient path back from the outputs to the inputs.
 Only later in training do these blocks come on line.
+You want a clean residual stream, no normalizations inside {\color{mred} why? This is a quote from Karpathy}.
 
 Dropout layers prevent overfitting.  Every forward/backward pass, randomly turns off some neurons, ends up training an ensamble of networks that all end up working together.
 

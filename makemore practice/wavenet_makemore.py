@@ -181,7 +181,7 @@ class Sequential:
 torch.manual_seed(42) #for reporoducibility without a generator
 
 n_embed = 24
-n_hidden = 128 #yields roughly same number of parameters as flat mlp, can see if there is better performance because 
+n_hidden = 8 #yields roughly same number of parameters as flat mlp, can see if there is better performance because 
 			  # of a better architecture (heirarchical mlp)
 
 
