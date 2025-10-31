@@ -2,7 +2,7 @@
 \ProvidesPackage{note_preamble}[2025/10/20]
 
 
-
+\RequirePackage{enumitem}
 \RequirePackage{listings}
 \RequirePackage{xcolor}
 \RequirePackage[T1]{fontenc}
@@ -10,7 +10,10 @@
 \RequirePackage{amsfonts}
 \RequirePackage{amssymb}
 \RequirePackage[skins, most]{tcolorbox}
-\RequirePackage[colorlinks=true]{hyperref}
+
+
+\RequirePackage{fontspec}
+\setmonofont{JetBrains Mono NL}
 
 
 %%%%%%%%% COLOR DEFINITIONS %%%%%%%%
@@ -20,7 +23,19 @@
 \definecolor{yorhagrid}{HTML}{B5AF9C}
 \definecolor{mred}{HTML}{D67069}		%box color red
 \definecolor{mblue}{HTML}{6887A1}		%box color blue
-
+\definecolor{catpuccin_base}{rgb}{0.14, 0.15, 0.23}
+\definecolor{catpuccin_text}{rgb}{0.79, 0.83, 0.96}
+\definecolor{catpuccin_subtext1}{rgb}{0.72, 0.75, 0.88}
+\definecolor{catpuccin_overlay0}{rgb}{0.43, 0.45, 0.55}
+\definecolor{catpuccin_mantle}{rgb}{0.11, 0.12, 0.19} 
+\definecolor{catpuccin_green}{rgb}{0.65, 0.85, 0.58}
+\definecolor{catpuccin_mauve}{rgb}{0.77, 0.63, 0.96}
+\definecolor{catpuccin_sapphire}{rgb}{0.49, 0.77, 0.89}
+\definecolor{catpuccin_sky}{rgb}{0.57, 0.84, 0.89}
+\definecolor{catpuccin_peach}{rgb}{0.96, 0.66, 0.5}
+\definecolor{catpuccin_crust}{rgb}{0.09, 0.1, 0.15}
+\definecolor{catpuccin_red}{rgb}{0.93, 0.53, 0.59}
+\definecolor{catpuccin_blue}{rgb}{0.54, 0.68, 0.96}
 %New code environment colors defined below
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -30,20 +45,23 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% set page and text color
-\pagecolor{yorhabg}
-\color{yorhafg}
+%% set links once colors are defined
+\RequirePackage[colorlinks=true, linkcolor = catpuccin_peach]{hyperref}
 
+
+% set page and text color
+\pagecolor{catpuccin_base}
+\color{catpuccin_text}
 
 
 
 %%%%%%%%% Code listing style named "python-style1" %%%%%%%%%%
 \lstdefinestyle{python-style1}{
-  backgroundcolor=\color{backcolour}, commentstyle=\color{codegreen},
-  keywordstyle=\color{magenta},
-  numberstyle=\tiny\color{codegray},
-  stringstyle=\color{codepurple},
-  basicstyle=\ttfamily\footnotesize\color{yorhabg},
+  backgroundcolor=\color{catpuccin_crust}, commentstyle=\color{catpuccin_sapphire},
+  keywordstyle=\color{catpuccin_mauve},
+  numberstyle=\tiny\color{catpuccin_overlay0},
+  stringstyle=\color{catpuccin_green},
+  basicstyle=\ttfamily\footnotesize\color{catpuccin_subtext1},
   breakatwhitespace=false,         
   breaklines=true,                 
   captionpos=b,                    
@@ -55,6 +73,7 @@
   showtabs=false,                  
   tabsize=2
 }
+
 
 %%%%%%%%%%%%%%%%% Margins %%%%%%%%%%%%%%%
 \topmargin=0in
@@ -70,10 +89,10 @@
 
 \newtcolorbox{bluebox}[1]{
     enhanced, 
-    colback=yorhabg,
-    colframe=mblue,
-    coltext=yorhafg,
-    coltitle=yorhabg,
+    colback=catpuccin_base,
+    colframe=catpuccin_blue,
+    coltext=catpuccin_text,
+    coltitle=catpuccin_base,
     attach boxed title to top left={yshift*=-\tcboxedtitleheight}, 
     title={#1},
     boxed title size=title,
@@ -94,10 +113,10 @@
 
 \newtcolorbox{redbox}[1]{
     enhanced, 
-    colback=yorhabg,
-    colframe=mred,
-    coltext=yorhafg,
-    coltitle=yorhabg,
+    colback=catpuccin_base,
+    colframe=catpuccin_red,
+    coltext=catpuccin_text,
+    coltitle=catpuccin_base,
     attach boxed title to top left={yshift*=-\tcboxedtitleheight}, 
     title={#1},
     boxed title size=title,

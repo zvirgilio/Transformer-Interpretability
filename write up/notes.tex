@@ -1,4 +1,5 @@
 \documentclass{article}
+
 \usepackage{note_preamble}
 
 \usepackage{titling}
@@ -11,6 +12,81 @@
 \title{Machine Learning Notes}
 \author{Zach Virgilio}
 \maketitle 
+
+\section*{To Learn}
+\begin{enumerate}
+    \item Statistical Basics
+        \begin{itemize}
+            \item Mean vs (Sample) S.D.
+            \item Expectation vs variance vs Pop. S.D.
+            \item Normal/Multivariate Normal Distributions
+            \item Bernoulli and Binomial Distributions
+            \item Covariance and Correlction (what they measure and what they miss)
+        \end{itemize}
+
+    \item Estimation and Inference
+        \begin{itemize}
+            \item Estimators: biased vs unbiased, consistent vs inconsistent
+            \item Variance of estimators (beggining of bias-variance tradeoff)
+            \item Uniform minimum variance unbiased estimators
+            \item maximum likeliehood estimators
+            \item maximum a posteriori
+            \item Point vs interval estimation
+            \item Hypothesis testing: p-values, Type I/II errors, power
+            \item Bayesian vs Frequentist thinking
+        \end{itemize}
+
+    \item Information Theory
+        \begin{itemize}
+            \item Entropy - uncertainty, information content, optimal encoding
+            \item Cross-Entropy - measuring the distance between distributions
+            \item Binary vs Categorical Cross entropy
+            \item KL divergence (why isn't it symmetric)
+            \item Connection between cross entropy and MLE
+            \item Mutual information (used in feature selection mechanisms)
+            \item Perplexity (how language models measure uncertainty)
+        \end{itemize}
+
+    \item Models Able to Derive on a Board
+        \begin{itemize}
+            \item Linear regression, closed form, assumptions, when it breaks
+            \item Logisitic regression, why sigmoid, why cross-entropy, connection to odds ratios
+            \item Softmax regression (multinomial logistics) - foundation of modern classifiers
+            \item K-Means (EM algorithm in disguise)
+            \item Expectation maximization (principle behind unsupervised algorithms)
+            \item Naive Bayes (why naive, why it still works)
+            \item Language models: n-grams, smoothing, why transformers are still doing probability
+        \end{itemize}
+
+    \item Generalizations
+        \begin{itemize}
+            \item Bias-Variance Tradeoff (explain w/o formula, probably also talk about double-descent)
+            \item Underfitting vs Overfitting - recognize it from loss curves
+            \item Regularization:
+                \begin{enumerate}[label=\alph*)]
+                    \item L1 (Lasso) - sparsity and feature selection
+                    \item L2 (Ridge) - shrinkage and stability
+                    \item Elastic net - when you need both
+                    \item Droput - why random works
+                    \item Early stopping - simplest regularizer
+                    \item Data augmentation - regularization through diversity
+                \end{enumerate}
+            \item Cross-validation - k-fold, stratified, time-series splits
+            \item Train/Val/Test splits - why you can't cheat
+            \item Model selection vs model assessment
+        \end{itemize}
+    \item Connections that Matter
+        \begin{itemize}
+            \item Why is MSE loss equivalent to MLE under Gaussian noise?
+            \item Why is cross-entropy loss equivalent to MLE for classification?
+            \item How does L2 regularization relate to MAP with a Gaussian prior?
+            \item How does L1 regularization relate to MAP with a Laplace prior?
+            \item Why dos logistic regression use both sigmoid and cross-entropy?
+            \item What's the relationship between PCA and eigenvalues?
+            \item How do attention weights relate to probability distributions?
+            \item Why use log probabilities in practice? (Numerical stability + MLE connection)
+        \end{itemize}
+\end{enumerate}
 
 \section*{Makemore notes}
 \subsection*{Diagnostic Tools and Visualization}

@@ -249,7 +249,8 @@ def main():
 	torch.manual_seed(1234)
 	config = Namerconfig
 	model = Namer(config)
-
+	optimizer = torch.optim.AdamW(model.parameters(), )
+	
 	print("initialized model")
 
 	random.seed(42)
@@ -265,7 +266,7 @@ def main():
 	max_iters=5000
 	# eval_interval=max_iters//100
 	eval_interval = 500
-	batch_size = 64
+	batch_size = 128
 
 	print("beginning training")
 	training_loop(model, optimizer, batch_size, max_iters, eval_interval, train_data, val_data)
