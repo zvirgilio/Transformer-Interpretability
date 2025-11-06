@@ -1,0 +1,70 @@
+\documentclass{article}
+\usepackage{tikz-cd}
+\usepackage{note_preamble}
+
+\usepackage{titling}
+\setlength{\droptitle}{-2cm}
+
+
+\lstset{style=python-style1}
+
+\begin{document}
+\title{Walking Through a Tiny Transformer}
+\author{Zach Virgilio}
+\maketitle 
+
+The data was a synthetic dataset consisting of the pattern $'ABC'$ repeating over and over.  The model architecture is visualized in the following diagram.
+% https://q.uiver.app/#q=WzAsNyxbMCwxLCJcXHRleHR7V2VpZ2h0IEVtYmVkZGluZ30iXSxbMCwzLCJcXHRleHR7UG9zaXRpb24gRW1iZWRkaW5nfSJdLFsyLDIsIisiXSxbNCwyLCJJZCJdLFs0LDAsIlxcdGV4dHtzb2Z0bWF4fShRXFxjZG90IEteVClcXGNkb3QgViJdLFs2LDIsIisiXSxbOCwyLCJcXHRleHR7TG9naXRzfSJdLFswLDJdLFsxLDJdLFsyLDNdLFsyLDQsIlxcdGV4dHtQcm9qZWN0IE91dH0iLDAseyJjdXJ2ZSI6LTN9XSxbMyw1XSxbNCw1LCJcXHRleHR7UHJvamVjdCBCYWNrfSIsMCx7ImN1cnZlIjotNH1dLFs1LDYsIlxcdGV4dHtMaW5lYXIgT3V0cHV0fSJdXQ==
+\[\begin{tikzcd}
+	&&&& {\text{softmax}(Q\cdot K^T)\cdot V} \\
+	{\text{Weight Embedding}} \\
+	&& {+} && Id && {+} && {\text{Logits}} \\
+	{\text{Position Embedding}}
+	\arrow["{\text{Project Back}}", curve={height=-24pt}, from=1-5, to=3-7]
+	\arrow[from=2-1, to=3-3]
+	\arrow["{\text{Project Out}}", curve={height=-18pt}, from=3-3, to=1-5]
+	\arrow[from=3-3, to=3-5]
+	\arrow[from=3-5, to=3-7]
+	\arrow["{\text{Linear Output}}", from=3-7, to=3-9]
+	\arrow[from=4-1, to=3-3]
+\end{tikzcd}\]
+This model only needs to learn 3 facts:
+\begin{itemize}
+	\item If I see 'A' as the last term, generate 'B'
+	\item If I see 'B' as the last term, generate 'C'
+	\item If I see 'C' as the last term, generate 'A'
+\end{itemize}
+We will walk through the linear algebra of the simple one layer transformer to see how the model encoded these facts.
+
+With a fixed seed of 1234, the model learned a cross-entopry error of $0.0001$.  We will use it's parameters to manually follow an execution with input $ABC$. The foward pass naturally predicts a value after each token in context, so our model should predict $B$ follows the first $A$, $C$ follows the $B$, and finally, the actual new token prediction, $A$ comes after the last $C$.
+
+The embedding weights are:
+\[
+	A \sim 0 \to 
+		W_A = \begin{bmatrix}
+			1.1988 \\ 1.3633 
+		\end{bmatrix}, 
+	\quad B\sim 1 \to 
+		W_B = \begin{bmatrix}
+			-1.8032 \\ -0.7401
+		\end{bmatrix}, 
+	\quad C \sim 2 \to 
+		W_C = \begin{bmatrix}
+			-1.0425 \\ 1.4757
+		\end{bmatrix}
+\]
+Where $A$, $B$ and $C$ are encoded numerically as $0$, $1$ and $2$ respectively.  The context size is 3 pieces of information, with position weights:
+\[
+	\text{pos 0} \to W_0=\begin{bmatrix}
+		-0.3160 \\ 0.9374
+	\end{bmatrix}, 
+	\quad \text{pos 1} \to W_1=\begin{bmatrix}
+		-0.4459 \\ 1.2218
+	\end{bmatrix}, 
+	\quad \text{pos 2} \to W_2 = \begin{bmatrix}
+		-0.2666 \\ 0.9128
+	\end{bmatrix}
+\]
+ 
+
+\end{document}
