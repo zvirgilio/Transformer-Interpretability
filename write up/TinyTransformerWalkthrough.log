@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023) (preloaded format=xelatex 2024.2.6)  5 NOV 2025 18:48
+This is XeTeX, Version 3.141592653-2.6-0.999995 (TeX Live 2023) (preloaded format=xelatex 2024.2.6)  7 NOV 2025 00:15
 entering extended mode
  \write18 enabled.
  %&-line parsing enabled.
@@ -977,19 +977,19 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 14.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
-]
+] [2]
 (./TinyTransformerWalkthrough.aux)
 Package rerunfilecheck Info: File `TinyTransformerWalkthrough.out' has not chan
 ged.
 (rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
  ) 
 Here is how much of TeX's memory you used:
- 32207 strings out of 476683
- 725899 string characters out of 5804048
- 1866018 words of memory out of 5000000
- 51937 multiletter control sequences out of 15000+600000
- 522117 words of font info for 77 fonts, out of 8000000 for 9000
+ 32215 strings out of 476683
+ 726116 string characters out of 5804048
+ 1877018 words of memory out of 5000000
+ 51940 multiletter control sequences out of 15000+600000
+ 522141 words of font info for 80 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  114i,17n,118p,505b,973s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on TinyTransformerWalkthrough.pdf (1 page).
+Output written on TinyTransformerWalkthrough.pdf (2 pages).
